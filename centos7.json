@@ -1,0 +1,51 @@
+{
+    "variables": {
+        "headless": "false",
+        "memory": "512",
+        "disk_size": "40000",
+        "mirror": "",
+        "ssh_timeout": "1800s"
+    },
+    "builders": [{
+        "type": "virtualbox-iso",
+        "headless": "{{user `headless`}}",
+        "guest_os_type": "RedHat_64",
+        "iso_url": "{{user `mirror`}}CentOS-7-x86_64-NetInstall-1511.iso",
+        "iso_checksum": "99d305fa40ec9e28ef8450c3bcc45f85",
+        "iso_checksum_type": "md5",
+        "ssh_username": "vagrant",
+        "ssh_password": "vagrant",
+        "ssh_wait_timeout": "{{user `ssh_timeout`}}",
+        "vm_name": "CentOS-7-Vagrant",
+        "disk_size": "{{user `disk_size`}}",
+        "http_directory": "http",
+        "boot_wait": "10s",
+        "boot_command": [
+            "<esc><wait>",
+            "linux ks=http://{{.HTTPIP}}:{{.HTTPPort}}/ks7.cfg",
+            "<enter><wait>"
+        ],
+        "shutdown_command": "sudo systemctl poweroff",
+        "vboxmanage": [
+            ["modifyvm", "{{.Name}}", "--memory", "{{user `memory`}}"],
+            ["modifyvm", "{{.Name}}", "--usb", "off"],
+            ["modifyvm", "{{.Name}}", "--audio", "none"]
+        ]
+    }],
+    "provisioners": [{
+        "type": "shell",
+        "scripts": [
+            "scripts/base/repo.sh",
+            "scripts/base/virtualbox.sh",
+            "scripts/base/vagrant.sh",
+            "scripts/base/sshd.sh",
+            "scripts/base/locale.sh",
+            "scripts/base/cleanup.sh",
+            "scripts/base/minimize.sh"
+        ]
+    }],
+    "post-processors": [{
+        "type": "vagrant",
+        "output": "build/centos-7-x86_64-{{.Provider}}.box"
+    }]
+}

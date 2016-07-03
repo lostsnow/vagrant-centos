@@ -198,6 +198,16 @@ _upload() {
         usage upload
     fi
 
+    case "$(uname -s)" in
+        Darwin | Linux )
+            null_device=/dev/null ;;
+        CYGWIN* | MINGW* | MSYS* )
+            null_device=NUL ;;
+        *)
+            fatal "Unsupport OS: "$(uname -s)
+        ;;
+    esac
+
     info "get upload token"
     RESPONSE=$(curl -s https://atlas.hashicorp.com/api/v1/box/${BOX_NAME}/version/${BOX_VERSION}/provider/${BOX_PROVIDER}/upload?access_token=${ATLAS_TOKEN})
     check_error ${RESPONSE}
@@ -205,7 +215,7 @@ _upload() {
     TOKEN=$(json_val ${RESPONSE}, "token")
 
     info "start upload"
-    curl -X PUT --upload-file ${BOX_FILE} https://binstore.hashicorp.com/${TOKEN} --progress-bar > /dev/null
+    curl -X PUT --upload-file ${BOX_FILE} https://binstore.hashicorp.com/${TOKEN} --progress-bar -o ${null_device}
 
     info "upload success"
 }
