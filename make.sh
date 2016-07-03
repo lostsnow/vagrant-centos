@@ -216,6 +216,10 @@ _upload() {
 
     info "start upload"
     curl -X PUT --upload-file ${BOX_FILE} https://binstore.hashicorp.com/${TOKEN} --progress-bar -o ${null_device}
+    result=$?
+    if [ result != 0 ]; then
+        fatal "upload error"
+    fi
 
     info "upload success"
 }
