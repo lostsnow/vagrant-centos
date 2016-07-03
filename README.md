@@ -29,6 +29,8 @@ packer build centos7.json
  `mirror`            |	             | A URL of the ISO mirror, default use local ISO, eg: `http://mirrors.kernel.org/centos/7.2.1511/isos/x86_64/`
  `ssh_timeout`       | 1800s         | SSH connect timeout
 
+#### Example
+
 ```shell
 packer build -var headless=true -var disk_size=100000 base/centos7.json
 ```
@@ -38,11 +40,11 @@ Publish
 
 ```shell
 # create box version and provider
-make.sh create -v 0.2.0
+./make.sh create -v 0.2.0
 # upload box file
-make.sh upload -v 0.2.0 -f build/centos-7-x86_64-virtualbox.box
+./make.sh upload -v 0.2.0 -f build/centos-7-x86_64-virtualbox.box
 # release box
-make.sh release -v 0.2.0
+./make.sh release -v 0.2.0
 ```
 
 Test

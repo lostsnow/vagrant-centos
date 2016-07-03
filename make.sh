@@ -8,6 +8,7 @@ readonly CUR_DIR=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
 
 BOX_NAME="lostsnow/centos7"
 BOX_PROVIDER="virtualbox"
+ATLAS_API_URL=https://atlas.hashicorp.com/api/v1/box
 
 # Flag paser
 usage() {
@@ -170,16 +171,16 @@ _create() {
         usage create
     fi
 
-    info "create version"
-    response=$(curl -s https://atlas.hashicorp.com/api/v1/box/${BOX_NAME}/versions -X POST -d version[version]=${BOX_VERSION} -d access_token=${ATLAS_TOKEN})
+    info "Create version"
+    response=$(curl -s ${ATLAS_API_URL}/${BOX_NAME}/versions -X POST -d version[version]=${BOX_VERSION} -d access_token=${ATLAS_TOKEN})
     check_error $response
     echo $response
 
-    info "create provider"
-    response=$(curl -s https://atlas.hashicorp.com/api/v1/box/${BOX_NAME}/version/${BOX_VERSION}/providers -X POST -d provider[name]=${BOX_PROVIDER} -d access_token=${ATLAS_TOKEN})
+    info "Create provider"
+    response=$(curl -s ${ATLAS_API_URL}/${BOX_NAME}/version/${BOX_VERSION}/providers -X POST -d provider[name]=${BOX_PROVIDER} -d access_token=${ATLAS_TOKEN})
     check_error $response
     echo $response
-    success "create success"
+    success "Create success"
 }
 
 _upload() {
@@ -204,32 +205,33 @@ _upload() {
         CYGWIN* | MINGW* | MSYS* )
             null_device=NUL ;;
         *)
-            fatal "Unsupport OS: "$(uname -s)
+            fatal "OS not support: "$(uname -s)
         ;;
     esac
 
-    info "get upload token"
-    RESPONSE=$(curl -s https://atlas.hashicorp.com/api/v1/box/${BOX_NAME}/version/${BOX_VERSION}/provider/${BOX_PROVIDER}/upload?access_token=${ATLAS_TOKEN})
+    info "Get upload token"
+    RESPONSE=$(curl -s ${ATLAS_API_URL}/${BOX_NAME}/version/${BOX_VERSION}/provider/${BOX_PROVIDER}/upload?access_token=${ATLAS_TOKEN})
     check_error ${RESPONSE}
     echo ${RESPONSE}
     TOKEN=$(json_val ${RESPONSE}, "token")
 
-    info "start upload"
+    info "Using token: "$TOKEN
+    info "Start upload"
     curl -X PUT --upload-file ${BOX_FILE} https://binstore.hashicorp.com/${TOKEN} --progress-bar -o ${null_device}
     result=$?
     if [ result != 0 ]; then
-        fatal "upload error"
+        fatal "Upload error"
     fi
 
-    info "upload success"
+    info "Upload success"
 }
 
 _release() {
-    info "release box"
-    response=$(curl -s https://atlas.hashicorp.com/api/v1/box/${BOX_NAME}/version/${BOX_VERSION}/release  -X PUT -d access_token=${ATLAS_TOKEN})
+    info "Release box"
+    response=$(curl -s ${ATLAS_API_URL}/${BOX_NAME}/version/${BOX_VERSION}/release -X PUT -d access_token=${ATLAS_TOKEN})
     check_error $response
     echo $response
-    success "release success"
+    success "Release success"
 }
 
 case "$1" in
