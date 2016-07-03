@@ -3,6 +3,7 @@
     },
     "builders": [{
         "type": "virtualbox-iso",
+        "headless": true,
         "guest_os_type": "RedHat_64",
         "iso_url": "CentOS-7-x86_64-NetInstall-1511.iso",
         "iso_checksum": "99d305fa40ec9e28ef8450c3bcc45f85",
