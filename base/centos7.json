@@ -41,6 +41,6 @@
     "post-processors": [{
         "type": "vagrant",
         "output": "build/centos-7-x86_64-{{.Provider}}-base.box",
-        "vagrantfile_template": "Vagrantfile"
+        "vagrantfile_template": "base/Vagrantfile"
     }]
 }
