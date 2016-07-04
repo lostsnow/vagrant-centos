@@ -116,7 +116,7 @@ json_val() {
 check_error() {
     if  [[ $1 == '{"errors":'* ]] ;
     then
-        error $1
+        error "$*"
         exit 1
     fi
 }
@@ -210,17 +210,17 @@ _upload() {
     esac
 
     info "Get upload token"
-    RESPONSE=$(curl -s ${ATLAS_API_URL}/${BOX_NAME}/version/${BOX_VERSION}/provider/${BOX_PROVIDER}/upload?access_token=${ATLAS_TOKEN})
-    check_error ${RESPONSE}
-    echo ${RESPONSE}
-    TOKEN=$(json_val ${RESPONSE}, "token")
+    response=$(curl -s ${ATLAS_API_URL}/${BOX_NAME}/version/${BOX_VERSION}/provider/${BOX_PROVIDER}/upload?access_token=${ATLAS_TOKEN})
+    check_error ${response}
+    echo ${response}
+    TOKEN=$(json_val ${response}, "token")
 
     info "Using token: "$TOKEN
     info "Start upload"
-    curl -X PUT --upload-file ${BOX_FILE} https://binstore.hashicorp.com/${TOKEN} --progress-bar -o ${null_device}
-    result=$?
-    if [ result != 0 ]; then
-        fatal "Upload error"
+    response=$(curl -X PUT -f -T ${BOX_FILE} https://binstore.hashicorp.com/${TOKEN} --progress-bar -o ${null_device} -w "%{http_code}")
+    return_code=$?
+    if [ ${return_code} != 0 ] || [ x${response} != "x200" ]; then
+        fatal "Upload error"[${return_code},${response}]
     fi
 
     info "Upload success"
